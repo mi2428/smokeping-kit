@@ -1,14 +1,14 @@
 # Optional override for running without Caddy.
 #
 # Default:
-#   docker compose up -d
+#  $ docker compose up -d
 #
 # Direct component ports, no Caddy:
-#   make up DIRECT=1
+#  $ make up DIRECT=1
 #
 # Raw Compose equivalent:
-#   docker compose rm -sf caddy
-#   docker compose -f docker-compose.yml -f docker-compose.no-caddy.yml up -d --remove-orphans
+#  $ docker compose rm -sf caddy
+#  $ docker compose -f docker-compose.yml -f docker-compose.no-caddy.yml up -d --remove-orphans
 #
 # This file keeps the main template Caddy by default while making opt-out explicit,
 # copy-pasteable, and easy to remove from automation.

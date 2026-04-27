@@ -5,10 +5,10 @@ services:
     # Single-entry reverse proxy.
     # It uses path-based routing, similar to a small local ALB:
     #   /grafana      -> grafana
-    #   /prometheus  -> prometheus
+    #   /prometheus   -> prometheus
     #   /alertmanager -> alertmanager
-    #   /blackbox    -> blackbox-exporter
-    #   /pushgateway -> pushgateway
+    #   /blackbox     -> blackbox-exporter
+    #   /pushgateway  -> pushgateway
     image: caddy:latest
     pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
     environment:
@@ -39,10 +39,6 @@ services:
       - --web.enable-lifecycle
       - "--web.external-url=${PROMETHEUS_EXTERNAL_URL:-/prometheus/}"
       - --web.route-prefix=/
-    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
-    # direct component ports.
-    # ports:
-    #   - "${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       # File service discovery targets. Edit files under this directory to add
@@ -65,10 +61,6 @@ services:
       - --storage.path=/alertmanager
       - "--web.external-url=${ALERTMANAGER_EXTERNAL_URL:-http://localhost:9000/alertmanager/}"
       - --web.route-prefix=/
-    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
-    # direct component ports.
-    # ports:
-    #   - "${ALERTMANAGER_PORT:-9093}:9093"
     volumes:
       # Replace this with a private config or Docker secret mount when you add
       # real Slack/webhook/email/PagerDuty credentials.
@@ -81,10 +73,6 @@ services:
     # You can remove this service if the stack is only for blackbox probing.
     image: prom/pushgateway:latest
     pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
-    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
-    # direct component ports.
-    # ports:
-    #   - "${PUSHGATEWAY_PORT:-9091}:9091"
     restart: unless-stopped
 
   blackbox-exporter:
@@ -99,10 +87,6 @@ services:
       # Makes the default ICMP target work on Linux Docker. Docker Desktop
       # already provides this name, but the entry is harmless there.
       - "host.docker.internal:host-gateway"
-    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
-    # direct component ports.
-    # ports:
-    #   - "${BLACKBOX_EXPORTER_PORT:-9115}:9115"
     volumes:
       - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro
     restart: unless-stopped
@@ -127,10 +111,6 @@ services:
       GF_PLUGINS_PREINSTALL_DISABLED: "true"
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_USERS_DEFAULT_THEME: "${GRAFANA_DEFAULT_THEME:-system}"
-    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
-    # direct component ports.
-    # ports:
-    #   - "${GRAFANA_PORT:-3000}:3000"
     volumes:
       # Datasource and dashboard provisioning live here. Restart Grafana after
       # changing dashboard JSON or provisioning YAML.
