@@ -1,0 +1,11 @@
+# Edit this file to add or remove HTTP GET body-regexp targets. Prometheus
+# refreshes file-SD files every 30 seconds, so target edits do not require a
+# restart. Labels are copied to metrics and alerts.
+- targets:
+    # The default module expects the body to contain "Example Domain".
+    # Duplicate the module in docker/blackbox/blackbox.yml for different regex checks.
+    - https://example.com
+  labels:
+    group: examples
+    probe: http_get_body
+    body_regexp: Example Domain

@@ -1,0 +1,47 @@
+{
+	# Local HTTP by default. If you expose this outside localhost, consider
+	# enabling HTTPS and authentication first.
+	auto_https off
+}
+
+:9000 {
+	encode zstd gzip
+
+	# Optional Basic Auth for every proxied app.
+	#
+	# Generate a hash:
+	#   docker run --rm -it caddy:latest caddy hash-password --plaintext 'change-me'
+	#
+	# Then uncomment:
+	#
+	# basic_auth {
+	# 	admin <paste-hashed-password-here>
+	# }
+
+	redir / /grafana/ 302
+
+	redir /grafana /grafana/ 302
+	handle /grafana/* {
+		reverse_proxy grafana:3000
+	}
+
+	redir /prometheus /prometheus/ 302
+	handle_path /prometheus/* {
+		reverse_proxy prometheus:9090
+	}
+
+	redir /alertmanager /alertmanager/ 302
+	handle_path /alertmanager/* {
+		reverse_proxy alertmanager:9093
+	}
+
+	redir /blackbox /blackbox/ 302
+	handle_path /blackbox/* {
+		reverse_proxy blackbox-exporter:9115
+	}
+
+	redir /pushgateway /pushgateway/ 302
+	handle_path /pushgateway/* {
+		reverse_proxy pushgateway:9091
+	}
+}

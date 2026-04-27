@@ -1,0 +1,30 @@
+groups:
+  - name: smokeping_kit.recording
+    # Recording rules make Grafana dashboards and alerts cheaper and easier to
+    # read. Keep this interval close to the Prometheus scrape interval unless
+    # the deployment becomes large.
+    interval: 30s
+    rules:
+      # Recent success ratio per series. 1 means all probes succeeded, 0 means
+      # all probes failed in the window.
+      - record: probe:availability:5m
+        expr: avg_over_time(probe_success{job=~"blackbox_.*"}[5m])
+
+      # Good for "is this currently reliable?" dashboard stats.
+      - record: probe:availability:1h
+        expr: avg_over_time(probe_success{job=~"blackbox_.*"}[1h])
+
+      # Useful for daily availability summary panels. Newly created targets will
+      # not have a full 24h history yet; Grafana will show whatever is present.
+      - record: probe:availability:24h
+        expr: avg_over_time(probe_success{job=~"blackbox_.*"}[24h])
+
+      # p95 over the last hour from probe_duration_seconds. For ICMP RTT-specific
+      # latency, use probe_icmp_duration_seconds{phase="rtt"} in Grafana panels.
+      - record: probe:latency_p95:1h
+        expr: quantile_over_time(0.95, probe_duration_seconds{job=~"blackbox_.*"}[1h])
+
+      # Count currently failed probes by job/group/probe. This is useful for
+      # status summary panels and simple fleet-wide alerts.
+      - record: probe:down:count
+        expr: count by (job, group, probe) (probe_success{job=~"blackbox_.*"} == 0)

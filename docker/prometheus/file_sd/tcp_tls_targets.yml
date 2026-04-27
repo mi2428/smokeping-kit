@@ -1,0 +1,9 @@
+# Edit this file to add or remove TCP TLS targets. Prometheus refreshes file-SD
+# files every 30 seconds, so target edits do not require a restart. Labels are
+# copied to metrics and alerts.
+- targets:
+    # TCP TLS checks perform a TLS handshake against host:port.
+    - example.com:443
+  labels:
+    group: examples
+    probe: tcp_tls

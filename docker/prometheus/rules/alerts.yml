@@ -1,0 +1,92 @@
+groups:
+  - name: smokeping_kit.alerts
+    rules:
+      # Fires when the probe itself returns failure. This is the broadest alert
+      # and applies to ICMP, HTTP, TCP, TLS, and DNS probe jobs.
+      #
+      # Tuning:
+      # - Increase "for" for noisy networks.
+      # - Add labels like team/service/region in file_sd target labels, then use
+      #   them in Alertmanager routes.
+      - alert: ProbeTargetDown
+        expr: probe_success{job=~"blackbox_.*"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Probe target is down"
+          description: "{{ $labels.job }} {{ $labels.instance }} has failed for more than 2 minutes."
+
+      # Smokeping-style packet loss approximation for ICMP. Blackbox exporter
+      # stores one success/failure sample per scrape, so avg_over_time() over
+      # probe_success is the recent success ratio.
+      #
+      # Example thresholds:
+      # - < 0.99 for very sensitive internal checks.
+      # - < 0.90 for internet-facing checks with occasional loss.
+      # - < 0.50 if you only want severe degradation.
+      - alert: ProbePacketLoss
+        expr: avg_over_time(probe_success{job="blackbox_icmp"}[5m]) < 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "ICMP packet loss detected"
+          description: "{{ $labels.instance }} ICMP availability over 5 minutes is below 90%."
+
+      # Uses the recording rule probe:latency_p95:1h. The default threshold is
+      # intentionally simple: p95 over 1s for 10 minutes. Split this by job if
+      # you want stricter ICMP and looser HTTP thresholds.
+      #
+      # Examples:
+      #   probe:latency_p95:1h{job="blackbox_icmp"} > 0.2
+      #   probe:latency_p95:1h{job=~"blackbox_http_.*"} > 2
+      - alert: ProbeHighLatency
+        expr: probe:latency_p95:1h{job=~"blackbox_.*"} > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Probe latency is high"
+          description: "{{ $labels.job }} {{ $labels.instance }} p95 latency over 1 hour is above 1s."
+
+      # HTTP module failures are usually already caught by ProbeTargetDown.
+      # This alert keeps the status code visible and is helpful for debugging.
+      #
+      # If you intentionally accept redirects or 3xx/4xx statuses, change the
+      # Blackbox module valid_status_codes first, then tune this expression.
+      - alert: ProbeHttpStatusFailure
+        expr: probe_http_status_code{job=~"blackbox_http_.*|blackbox_https_cert"} != 200
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP status check failed"
+          description: "{{ $labels.job }} {{ $labels.instance }} returned HTTP {{ $value }}."
+
+      # Certificate expiry warning. This is evaluated only for jobs that expose
+      # probe_ssl_earliest_cert_expiry. Raise the threshold to 30 or 45 days if
+      # your certificate renewal process is manual.
+      - alert: ProbeTlsCertificateExpiringSoon
+        expr: |
+          (probe_ssl_earliest_cert_expiry{job=~"blackbox_https_cert|blackbox_http_.*"} - time()) / 86400 < 14
+          and
+          probe_ssl_earliest_cert_expiry{job=~"blackbox_https_cert|blackbox_http_.*"} - time() > 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TLS certificate expires soon"
+          description: "{{ $labels.instance }} TLS certificate expires in less than 14 days."
+
+      # Separate critical alert for already-expired certificates. Keeping this
+      # distinct makes Alertmanager routing easy: warning to chat, critical to
+      # the on-call path.
+      - alert: ProbeTlsCertificateExpired
+        expr: probe_ssl_earliest_cert_expiry{job=~"blackbox_https_cert|blackbox_http_.*"} - time() <= 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "TLS certificate is expired"
+          description: "{{ $labels.instance }} TLS certificate is expired."

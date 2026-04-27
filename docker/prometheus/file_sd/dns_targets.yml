@@ -1,0 +1,12 @@
+# Edit this file to add or remove DNS resolver targets. Prometheus refreshes
+# file-SD files every 30 seconds, so target edits do not require a restart.
+# Labels are copied to metrics and alerts.
+- targets:
+    # Docker's embedded resolver. Replace or add public/internal resolvers as needed.
+    - 127.0.0.11:53
+  labels:
+    group: docker
+    probe: dns_udp_a
+    # Informational label for dashboards/alerts. The actual query_name is set
+    # in docker/blackbox/blackbox.yml.
+    dns_query: example.com

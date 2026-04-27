@@ -1,0 +1,13 @@
+# Edit this file to add or remove ICMP targets. Prometheus refreshes file-SD
+# files every 30 seconds, so target edits do not require a restart.
+# Labels are copied to metrics and alerts; use them later for dashboard filters
+# or Alertmanager routing.
+- targets:
+    # Works on Docker Desktop and on Linux with host-gateway support.
+    # Add external IPs or hostnames here when your Docker network can pass ICMP.
+    - host.docker.internal
+  labels:
+    group: local
+    # ICMP to public IPs may fail from Docker Desktop even when HTTP/TCP works.
+    # On Linux hosts, public and private IPs usually work with NET_RAW enabled.
+    probe: icmp

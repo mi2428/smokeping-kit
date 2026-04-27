@@ -1,0 +1,14 @@
+# Edit this file to add or remove HTTP HEAD targets. Prometheus refreshes
+# file-SD files every 30 seconds, so target edits do not require a restart.
+# Labels are copied to metrics and alerts; use them later for dashboard filters
+# or Alertmanager routing.
+- targets:
+    # HTTP HEAD must return exactly 200 for the default module.
+    - https://example.com
+  labels:
+    group: examples
+    # Add labels such as service/env/owner to route alerts later:
+    # service: homepage
+    # env: prod
+    # owner: platform
+    probe: http_head_200

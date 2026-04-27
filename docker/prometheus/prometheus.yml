@@ -1,0 +1,179 @@
+global:
+  # Keep scrape_interval small enough for smoke monitoring to feel live, but not
+  # so small that public targets or DNS resolvers are hammered.
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # Recording and alerting rules are split for readability.
+  - /etc/prometheus/rules/*.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  # Self-monitoring. Useful for quickly seeing whether Prometheus itself is up.
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - prometheus:9090
+
+  # Alertmanager health. This does not send alerts by itself; alerting{} above
+  # wires Prometheus to Alertmanager.
+  - job_name: alertmanager
+    static_configs:
+      - targets:
+          - alertmanager:9093
+
+  # Optional push endpoint for scripts/batch jobs. If you remove pushgateway
+  # from docker-compose.yml, remove this scrape job too.
+  - job_name: pushgateway
+    honor_labels: true
+    static_configs:
+      - targets:
+          - pushgateway:9091
+
+  # All Blackbox jobs follow the same relabeling pattern:
+  # - file_sd target becomes __param_target, the real probe target.
+  # - instance is set to the human-readable target.
+  # - __address__ is rewritten to the Blackbox Exporter container.
+  #
+  # To add a new probe type:
+  # 1. Add a module to docker/blackbox/blackbox.yml.
+  # 2. Add a file_sd target file under docker/prometheus/file_sd/.
+  # 3. Copy one of these scrape jobs and change job_name/module/file.
+  - job_name: blackbox_icmp
+    metrics_path: /probe
+    params:
+      module:
+        - icmp_ipv4
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/icmp_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_dns_udp_a
+    metrics_path: /probe
+    params:
+      module:
+        - dns_udp_a
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/dns_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_https_cert
+    metrics_path: /probe
+    params:
+      module:
+        - https_cert
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/https_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_http_get_body
+    metrics_path: /probe
+    params:
+      module:
+        - http_get_body
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/http_body_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_tcp_tls
+    metrics_path: /probe
+    params:
+      module:
+        - tcp_tls
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/tcp_tls_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_http_head_200
+    metrics_path: /probe
+    params:
+      module:
+        - http_head_200
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/http_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_tcp_connect
+    metrics_path: /probe
+    params:
+      module:
+        - tcp_connect
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/tcp_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

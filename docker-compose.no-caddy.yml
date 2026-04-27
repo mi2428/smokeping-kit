@@ -1,0 +1,56 @@
+# Optional override for running without Caddy.
+#
+# Default:
+#   docker compose up -d
+#
+# Direct component ports, no Caddy:
+#   make up DIRECT=1
+#
+# Raw Compose equivalent:
+#   docker compose rm -sf caddy
+#   docker compose -f docker-compose.yml -f docker-compose.no-caddy.yml up -d --remove-orphans
+#
+# This file keeps the main template Caddy by default while making opt-out explicit,
+# copy-pasteable, and easy to remove from automation.
+
+services:
+  caddy:
+    # Move Caddy behind a profile that is not enabled by default in this
+    # override. This prevents Caddy from starting when the override is used.
+    profiles:
+      - caddy
+
+  prometheus:
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - "--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-30d}"
+      - --web.enable-lifecycle
+      - "--web.external-url=http://localhost:${PROMETHEUS_PORT:-9090}/"
+      - --web.route-prefix=/
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+
+  alertmanager:
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - "--web.external-url=http://localhost:${ALERTMANAGER_PORT:-9093}/"
+      - --web.route-prefix=/
+    ports:
+      - "${ALERTMANAGER_PORT:-9093}:9093"
+
+  pushgateway:
+    ports:
+      - "${PUSHGATEWAY_PORT:-9091}:9091"
+
+  blackbox-exporter:
+    ports:
+      - "${BLACKBOX_EXPORTER_PORT:-9115}:9115"
+
+  grafana:
+    environment:
+      GF_SERVER_ROOT_URL: "http://localhost:${GRAFANA_PORT:-3000}/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "false"
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"

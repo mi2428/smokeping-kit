@@ -1,0 +1,9 @@
+# Edit this file to add or remove HTTPS certificate targets. Prometheus
+# refreshes file-SD files every 30 seconds, so target edits do not require a
+# restart. Labels are copied to metrics and alerts.
+- targets:
+    # Used for HTTPS reachability and TLS certificate expiry metrics.
+    - https://example.com
+  labels:
+    group: examples
+    probe: https_cert

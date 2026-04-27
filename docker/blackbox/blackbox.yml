@@ -1,0 +1,116 @@
+modules:
+  # ICMP ping. Requires NET_RAW in docker-compose.yml. Container ICMP behavior
+  # depends on Docker/OS/network policy; Docker Desktop may allow
+  # host.docker.internal but block external ICMP replies from containers.
+  icmp_ipv4:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4
+
+  # HTTP "is it alive?" check. This intentionally uses HEAD and requires an
+  # exact 200 response. If you want redirects to be valid, set
+  # follow_redirects: true or add 301/302 to valid_status_codes.
+  http_head_200:
+    prober: http
+    timeout: 5s
+    http:
+      method: HEAD
+      valid_status_codes:
+        - 200
+      follow_redirects: false
+      preferred_ip_protocol: ip4
+
+  # HTTP GET with a body regexp. This module is intentionally example-specific.
+  # For real usage, duplicate this module and change the regexp and job name,
+  # for example http_get_healthz or http_get_login_page.
+  http_get_body:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      valid_status_codes:
+        - 200
+      fail_if_body_not_matches_regexp:
+        - Example Domain
+      preferred_ip_protocol: ip4
+
+  # HTTPS reachability plus TLS certificate metrics. Alerts use
+  # probe_ssl_earliest_cert_expiry from this module.
+  https_cert:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      fail_if_not_ssl: true
+      preferred_ip_protocol: ip4
+
+  # Plain TCP connect, equivalent to a simple tcping.
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: ip4
+
+  # TCP with TLS handshake. Good for checking that a port accepts TLS, even when
+  # you do not want a full HTTP request.
+  tcp_tls:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      tls: true
+      preferred_ip_protocol: ip4
+
+  # DNS query against the target resolver. The target is the resolver
+  # host:port, while query_name/query_type are configured in the module.
+  dns_udp_a:
+    prober: dns
+    timeout: 5s
+    dns:
+      transport_protocol: udp
+      preferred_ip_protocol: ip4
+      query_name: example.com
+      query_type: A
+      valid_rcodes:
+        - NOERROR
+
+  # More module ideas to copy into active config:
+  #
+  # http_get_json_health:
+  #   prober: http
+  #   timeout: 5s
+  #   http:
+  #     method: GET
+  #     valid_status_codes:
+  #       - 200
+  #     fail_if_body_not_matches_regexp:
+  #       - '"status"\s*:\s*"ok"'
+  #
+  # http_post_200:
+  #   prober: http
+  #   timeout: 5s
+  #   http:
+  #     method: POST
+  #     headers:
+  #       Content-Type: application/json
+  #     body: '{"probe":"smokeping-kit"}'
+  #     valid_status_codes:
+  #       - 200
+  #
+  # dns_tcp_a:
+  #   prober: dns
+  #   timeout: 5s
+  #   dns:
+  #     transport_protocol: tcp
+  #     preferred_ip_protocol: ip4
+  #     query_name: example.com
+  #     query_type: A
+  #     valid_rcodes:
+  #       - NOERROR
+  #
+  # ssh_banner:
+  #   prober: tcp
+  #   timeout: 5s
+  #   tcp:
+  #     query_response:
+  #       - expect: "^SSH-2.0-"

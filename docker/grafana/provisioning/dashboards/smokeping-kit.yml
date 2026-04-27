@@ -1,0 +1,16 @@
+apiVersion: 1
+
+providers:
+  - name: Smokeping Kit
+    orgId: 1
+    # Grafana folder name shown in the UI.
+    folder: Smokeping Kit
+    type: file
+    # false means deleting the JSON file will delete the provisioned dashboard.
+    disableDeletion: false
+    # true is convenient for template users. Set false if dashboards should only
+    # be edited in JSON and reprovisioned.
+    editable: true
+    options:
+      # Dashboard JSON files are loaded from this mounted directory.
+      path: /etc/grafana/provisioning/dashboards/json

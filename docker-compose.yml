@@ -1,0 +1,148 @@
+name: "${COMPOSE_PROJECT_NAME:-smokeping-kit}"
+
+services:
+  caddy:
+    # Single-entry reverse proxy.
+    # It uses path-based routing, similar to a small local ALB:
+    #   /grafana      -> grafana
+    #   /prometheus  -> prometheus
+    #   /alertmanager -> alertmanager
+    #   /blackbox    -> blackbox-exporter
+    #   /pushgateway -> pushgateway
+    image: caddy:latest
+    pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    environment:
+      CADDY_HTTP_PORT: "${CADDY_HTTP_PORT:-9000}"
+    ports:
+      - "${CADDY_HTTP_PORT:-9000}:9000"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - alertmanager
+      - blackbox-exporter
+      - grafana
+      - prometheus
+      - pushgateway
+    restart: unless-stopped
+
+  prometheus:
+    # The template intentionally uses latest for quick starts. Pin versions
+    # before relying on this in a controlled production environment.
+    image: prom/prometheus:latest
+    pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - "--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-30d}"
+      - --web.enable-lifecycle
+      - "--web.external-url=${PROMETHEUS_EXTERNAL_URL:-/prometheus/}"
+      - --web.route-prefix=/
+    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
+    # direct component ports.
+    # ports:
+    #   - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # File service discovery targets. Edit files under this directory to add
+      # or remove probes without restarting Prometheus.
+      - ./docker/prometheus/file_sd:/etc/prometheus/file_sd:ro
+      # Recording and alerting rules. Run `make validate` after edits.
+      - ./docker/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - alertmanager
+      - blackbox-exporter
+      - pushgateway
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - "--web.external-url=${ALERTMANAGER_EXTERNAL_URL:-http://localhost:9000/alertmanager/}"
+      - --web.route-prefix=/
+    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
+    # direct component ports.
+    # ports:
+    #   - "${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      # Replace this with a private config or Docker secret mount when you add
+      # real Slack/webhook/email/PagerDuty credentials.
+      - ./docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    restart: unless-stopped
+
+  pushgateway:
+    # Optional escape hatch for batch jobs or scripts that push metrics.
+    # You can remove this service if the stack is only for blackbox probing.
+    image: prom/pushgateway:latest
+    pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
+    # direct component ports.
+    # ports:
+    #   - "${PUSHGATEWAY_PORT:-9091}:9091"
+    restart: unless-stopped
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    command:
+      - --config.file=/etc/blackbox_exporter/blackbox.yml
+    cap_add:
+      # Needed for ICMP probes on Linux.
+      - NET_RAW
+    extra_hosts:
+      # Makes the default ICMP target work on Linux Docker. Docker Desktop
+      # already provides this name, but the entry is harmless there.
+      - "host.docker.internal:host-gateway"
+    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
+    # direct component ports.
+    # ports:
+    #   - "${BLACKBOX_EXPORTER_PORT:-9115}:9115"
+    volumes:
+      - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    environment:
+      # For public templates, default credentials are fine. Change them in .env
+      # before exposing Grafana outside localhost.
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:-admin}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-changeme}"
+      GF_SERVER_ROOT_URL: "${GRAFANA_ROOT_URL:-/grafana/}"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      # Keep first-run logs quiet and avoid bundled plugin update attempts in
+      # read-only container paths.
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_PLUGINS_PLUGIN_ADMIN_ENABLED: "false"
+      GF_PLUGINS_PREINSTALL_AUTO_UPDATE: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_USERS_DEFAULT_THEME: "${GRAFANA_DEFAULT_THEME:-system}"
+    # Caddy is the default entry point. Use docker-compose.no-caddy.yml for
+    # direct component ports.
+    # ports:
+    #   - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      # Datasource and dashboard provisioning live here. Restart Grafana after
+      # changing dashboard JSON or provisioning YAML.
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:
+  alertmanager-data:
+  prometheus-data:
+  grafana-data:

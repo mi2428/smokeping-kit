@@ -1,0 +1,138 @@
+# Alertmanager starts with a no-op receiver so the template works immediately.
+# Replace or extend the examples below when you are ready to send notifications.
+#
+# Validation:
+#   docker run --rm --entrypoint amtool \
+#     -v "$(pwd)/docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro" \
+#     prom/alertmanager:latest check-config /etc/alertmanager/alertmanager.yml
+#
+# Secrets:
+#   Do not commit real webhook URLs, SMTP passwords, PagerDuty keys, or tokens.
+#   Alertmanager config files do not behave like docker-compose variable expansion.
+#   For public repos, keep placeholders here and mount a private config in production.
+
+global:
+  # How long Alertmanager waits before marking an alert resolved if Prometheus
+  # stops sending it. Keep this comfortably above Prometheus evaluation_interval.
+  resolve_timeout: 5m
+
+  # Slack option A: set a default Incoming Webhook URL here, then receivers can
+  # omit api_url. Uncomment only in a private deployment config.
+  #
+  # slack_api_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+
+  # Email option A: configure SMTP globally, then add email_configs in receivers.
+  #
+  # smtp_smarthost: "smtp.example.com:587"
+  # smtp_from: "smokeping-kit@example.com"
+  # smtp_auth_username: "smokeping-kit@example.com"
+  # smtp_auth_password: "replace-me"
+  # smtp_require_tls: true
+
+# Optional Go templates for custom notification text.
+#
+# templates:
+#   - /etc/alertmanager/templates/*.tmpl
+
+route:
+  # The root route must have a receiver. The default receiver below intentionally
+  # does nothing, so the stack is safe to run without notification setup.
+  receiver: default
+
+  # Alerts with the same values for these labels are batched into one message.
+  # For small teams, grouping by alertname/job/instance is easy to read.
+  # For noisy fleets, consider group_by: [alertname, job, group].
+  group_by:
+    - alertname
+    - job
+    - instance
+
+  # Wait briefly for related alerts to arrive before sending the first message.
+  group_wait: 30s
+
+  # Minimum delay between updates for the same alert group.
+  group_interval: 5m
+
+  # How often unresolved alerts are resent.
+  repeat_interval: 4h
+
+  # Example route tree:
+  #
+  # routes:
+  #   # Critical alerts to PagerDuty, but continue so Slack also receives them.
+  #   - matchers:
+  #       - severity="critical"
+  #     receiver: pagerduty
+  #     continue: true
+  #
+  #   # Everything probe-related to Slack.
+  #   - matchers:
+  #       - job=~"blackbox_.*"
+  #     receiver: slack
+  #
+  #   # Less urgent certificate warnings to email.
+  #   - matchers:
+  #       - alertname="ProbeTlsCertificateExpiringSoon"
+  #     receiver: email
+
+# Optional inhibition examples:
+#
+# inhibit_rules:
+#   # If a target is fully down, suppress follow-on latency or HTTP status alerts
+#   # for the same job/instance.
+#   - source_matchers:
+#       - alertname="ProbeTargetDown"
+#     target_matchers:
+#       - alertname=~"ProbeHighLatency|ProbeHttpStatusFailure"
+#     equal:
+#       - job
+#       - instance
+
+receivers:
+  # No-op receiver. Good default for templates and local demos.
+  - name: default
+
+  # Slack Incoming Webhook example.
+  #
+  # - name: slack
+  #   slack_configs:
+  #     - send_resolved: true
+  #       # If global.slack_api_url is not set, put api_url here instead.
+  #       # api_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+#       channel: "#alerts"
+#       username: "smokeping-kit"
+#       icon_emoji: ":satellite:"
+#       title: '{{ .Status | toUpper }} {{ .CommonLabels.alertname }}'
+#       text: >-
+#         {{ range .Alerts }}
+#         *{{ .Labels.severity }}* `{{ .Labels.instance }}`
+#         {{ .Annotations.description }}
+#         {{ end }}
+  #
+  # Generic webhook example. Useful for ntfy, Gotify, custom bots, automation,
+  # or a small relay that turns Alertmanager payloads into Slack/Discord messages.
+  #
+  # - name: webhook
+  #   webhook_configs:
+  #     - send_resolved: true
+  #       url: "https://alerts.example.com/alertmanager"
+  #       http_config:
+  #         bearer_token: "replace-me"
+  #
+  # Email example.
+  #
+  # - name: email
+  #   email_configs:
+#     - send_resolved: true
+#       to: "oncall@example.com"
+#       headers:
+#         Subject: '[Smokeping Kit] {{ .Status }} {{ .CommonLabels.alertname }}'
+  #
+  # PagerDuty example.
+  #
+  # - name: pagerduty
+#   pagerduty_configs:
+#     - send_resolved: true
+#       routing_key: "replace-me"
+#       severity: '{{ .CommonLabels.severity }}'
+#       description: '{{ .CommonLabels.alertname }} on {{ .CommonLabels.instance }}'

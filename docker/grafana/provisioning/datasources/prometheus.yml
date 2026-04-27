@@ -1,0 +1,22 @@
+apiVersion: 1
+
+# If a user starts with the template and later changes datasource fields, an old
+# datasource can remain in grafana-data. Deleting by name first keeps the
+# provisioned datasource deterministic across restarts.
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+  - name: Prometheus
+    # The dashboard JSON refers to this UID. If you change it here, update
+    # docker/grafana/provisioning/dashboards/json/smokeping-kit.json too.
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    # Internal Compose service URL, not localhost. Grafana runs inside Docker.
+    url: http://prometheus:9090
+    isDefault: true
+    # Keep editable for quick experiments. Set false if you want provisioning to
+    # be the single source of truth.
+    editable: true
