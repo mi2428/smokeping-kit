@@ -69,6 +69,7 @@ logs: ## Follow logs. Set DIRECT=1 for direct port mode
 validate: ## Validate Compose, Caddy, Blackbox, Prometheus, and Alertmanager config
 	@$(COMPOSE) config >/dev/null
 	@$(COMPOSE_DIRECT) config >/dev/null
+	@awk 'BEGIN { bad = 0 } /^receivers:/ { in_receivers = 1 } in_receivers && /^#/ { printf "bad receiver comment indent: %s:%d:%s\n", FILENAME, FNR, $$0; bad = 1 } END { exit bad }' docker/alertmanager/alertmanager.yml
 	@$(DOCKER) run --rm -v "$$(pwd)/docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:latest caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 	@$(DOCKER) run --rm -v "$$(pwd)/docker/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro" prom/blackbox-exporter:latest --config.file=/etc/blackbox_exporter/blackbox.yml --config.check
 	@$(DOCKER) run --rm --entrypoint promtool -v "$$(pwd)/docker/prometheus:/etc/prometheus:ro" prom/prometheus:latest check config /etc/prometheus/prometheus.yml

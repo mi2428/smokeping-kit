@@ -99,15 +99,15 @@ receivers:
   #     - send_resolved: true
   #       # If global.slack_api_url is not set, put api_url here instead.
   #       # api_url: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
-#       channel: "#alerts"
-#       username: "smokeping-kit"
-#       icon_emoji: ":satellite:"
-#       title: '{{ .Status | toUpper }} {{ .CommonLabels.alertname }}'
-#       text: >-
-#         {{ range .Alerts }}
-#         *{{ .Labels.severity }}* `{{ .Labels.instance }}`
-#         {{ .Annotations.description }}
-#         {{ end }}
+  #       channel: "#alerts"
+  #       username: "smokeping-kit"
+  #       icon_emoji: ":satellite:"
+  #       title: '{{ .Status | toUpper }} {{ .CommonLabels.alertname }}'
+  #       text: >-
+  #         {{ range .Alerts }}
+  #         *{{ .Labels.severity }}* `{{ .Labels.instance }}`
+  #         {{ .Annotations.description }}
+  #         {{ end }}
   #
   # Generic webhook example. Useful for ntfy, Gotify, custom bots, automation,
   # or a small relay that turns Alertmanager payloads into Slack/Discord messages.
@@ -123,16 +123,16 @@ receivers:
   #
   # - name: email
   #   email_configs:
-#     - send_resolved: true
-#       to: "oncall@example.com"
-#       headers:
-#         Subject: '[Smokeping Kit] {{ .Status }} {{ .CommonLabels.alertname }}'
+  #     - send_resolved: true
+  #       to: "oncall@example.com"
+  #       headers:
+  #         Subject: '[Smokeping Kit] {{ .Status }} {{ .CommonLabels.alertname }}'
   #
   # PagerDuty example.
   #
   # - name: pagerduty
-#   pagerduty_configs:
-#     - send_resolved: true
-#       routing_key: "replace-me"
-#       severity: '{{ .CommonLabels.severity }}'
-#       description: '{{ .CommonLabels.alertname }} on {{ .CommonLabels.instance }}'
+  #   pagerduty_configs:
+  #     - send_resolved: true
+  #       routing_key: "replace-me"
+  #       severity: '{{ .CommonLabels.severity }}'
+  #       description: '{{ .CommonLabels.alertname }} on {{ .CommonLabels.instance }}'
