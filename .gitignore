@@ -1,3 +1,7 @@
+.env
+tools/file_sd/*.hosts
+!tools/file_sd/*.example.hosts
+
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,vim,emacs,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,vim,emacs,visualstudiocode
 
