@@ -2,8 +2,7 @@
 
 Smokeping Kit builds network smoke-test monitoring with Docker Compose — Prometheus, Blackbox Exporter, Pushgateway, Alertmanager, and Grafana with ready-to-use probes, recording/alert rules, and dashboards.
 
-The default setup publishes a single local entry point through Caddy.
-Replace the sample file-SD targets with your own hosts when you are ready to monitor real endpoints.
+[![](https://github.com/mi2428/smokeping-kit/blob/main/screenshot.png?raw=true)](https://github.com/mi2428/smokeping-kit/blob/main/screenshot.png)
 
 ## Getting Started
 
@@ -26,6 +25,7 @@ After setting up the repository, copy the local files and edit what you need.
 - Route alerts to Slack, webhook, email, or another receiver: [`docker/alertmanager/alertmanager.yml`](docker/alertmanager/alertmanager.yml)
 
 Run `make` to see the available commands and URLs.
+The default setup publishes a single local entry point through Caddy.
 
 ```console
 $ cp .env.example .env
