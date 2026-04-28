@@ -1,0 +1,11 @@
+# Edit this file to add or remove HTTP HEAD targets that must be reached over
+# IPv6. Prometheus refreshes file-SD files every 30 seconds.
+#
+# Example:
+#
+# - targets:
+#     - https://example.com
+#   labels:
+#     group: websites-v6
+#     probe: http_head_200_ipv6
+[]

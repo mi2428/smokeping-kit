@@ -8,6 +8,15 @@ modules:
     icmp:
       preferred_ip_protocol: ip4
 
+  # ICMP over IPv6. This requires Docker/network IPv6 support in addition to
+  # NET_RAW. Keep IPv6 targets separate from IPv4 targets so an IPv4-only Docker
+  # host does not create noisy default alerts.
+  icmp_ipv6:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip6
+
   # HTTP "is it alive?" check. This intentionally uses HEAD and requires an
   # exact 200 response. If you want redirects to be valid, set
   # follow_redirects: true or add 301/302 to valid_status_codes.
@@ -20,6 +29,17 @@ modules:
         - 200
       follow_redirects: false
       preferred_ip_protocol: ip4
+
+  # Same HTTP HEAD check, but force IPv6 name resolution/connectivity.
+  http_head_200_ipv6:
+    prober: http
+    timeout: 5s
+    http:
+      method: HEAD
+      valid_status_codes:
+        - 200
+      follow_redirects: false
+      preferred_ip_protocol: ip6
 
   # HTTP GET with a body regexp. This module is intentionally example-specific.
   # For real usage, duplicate this module and change the regexp and job name,
@@ -35,6 +55,18 @@ modules:
         - Example Domain
       preferred_ip_protocol: ip4
 
+  # HTTP GET body regexp over IPv6.
+  http_get_body_ipv6:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      valid_status_codes:
+        - 200
+      fail_if_body_not_matches_regexp:
+        - Example Domain
+      preferred_ip_protocol: ip6
+
   # HTTPS reachability plus TLS certificate metrics. Alerts use
   # probe_ssl_earliest_cert_expiry from this module.
   https_cert:
@@ -45,12 +77,28 @@ modules:
       fail_if_not_ssl: true
       preferred_ip_protocol: ip4
 
+  # HTTPS reachability plus TLS certificate metrics over IPv6.
+  https_cert_ipv6:
+    prober: http
+    timeout: 5s
+    http:
+      method: GET
+      fail_if_not_ssl: true
+      preferred_ip_protocol: ip6
+
   # Plain TCP connect, equivalent to a simple tcping.
   tcp_connect:
     prober: tcp
     timeout: 5s
     tcp:
       preferred_ip_protocol: ip4
+
+  # Plain TCP connect over IPv6.
+  tcp_connect_ipv6:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: ip6
 
   # TCP with TLS handshake. Good for checking that a port accepts TLS, even when
   # you do not want a full HTTP request.
@@ -60,6 +108,14 @@ modules:
     tcp:
       tls: true
       preferred_ip_protocol: ip4
+
+  # TCP with TLS handshake over IPv6.
+  tcp_tls_ipv6:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      tls: true
+      preferred_ip_protocol: ip6
 
   # DNS query against the target resolver. The target is the resolver
   # host:port, while query_name/query_type are configured in the module.
@@ -71,6 +127,19 @@ modules:
       preferred_ip_protocol: ip4
       query_name: example.com
       query_type: A
+      valid_rcodes:
+        - NOERROR
+
+  # DNS AAAA query against an IPv6-capable target resolver. Use targets such as
+  # "[2606:4700:4700::1111]:53" or another resolver reachable from Docker.
+  dns_udp_aaaa:
+    prober: dns
+    timeout: 5s
+    dns:
+      transport_protocol: udp
+      preferred_ip_protocol: ip6
+      query_name: example.com
+      query_type: AAAA
       valid_rcodes:
         - NOERROR
 
@@ -105,6 +174,17 @@ modules:
   #     preferred_ip_protocol: ip4
   #     query_name: example.com
   #     query_type: A
+  #     valid_rcodes:
+  #       - NOERROR
+  #
+  # dns_tcp_aaaa:
+  #   prober: dns
+  #   timeout: 5s
+  #   dns:
+  #     transport_protocol: tcp
+  #     preferred_ip_protocol: ip6
+  #     query_name: example.com
+  #     query_type: AAAA
   #     valid_rcodes:
   #       - NOERROR
   #

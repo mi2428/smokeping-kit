@@ -16,3 +16,11 @@
 93.184.216.34 example.com # probe=tcp_tls group=examples port=443
 
 127.0.0.11 docker-dns # probe=dns group=docker dns_query=example.com
+
+# IPv6 examples are commented out by default so IPv4-only Docker hosts stay
+# quiet. Uncomment only when Docker and the target network can reach IPv6.
+#
+# 2606:2800:220:1:248:1893:25c8:1946 example.com # probe=icmp6 group=examples-v6
+# 2606:2800:220:1:248:1893:25c8:1946 example.com # probe=httping6 group=examples-v6
+# 2606:2800:220:1:248:1893:25c8:1946 example.com # probe=tcping6 group=examples-v6 port=443
+# 2606:4700:4700::1111 cloudflare-dns # probe=dns6 group=dns-v6 dns_query=example.com

@@ -1,0 +1,11 @@
+# Edit this file to add or remove HTTPS certificate targets that must be reached
+# over IPv6. Prometheus refreshes file-SD files every 30 seconds.
+#
+# Example:
+#
+# - targets:
+#     - https://example.com
+#   labels:
+#     group: websites-v6
+#     probe: https_cert_ipv6
+[]

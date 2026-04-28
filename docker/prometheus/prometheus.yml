@@ -177,3 +177,138 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter:9115
+
+  # IPv6 probe jobs mirror the default IPv4 jobs. Their file-SD files are empty
+  # by default so the stack remains quiet on IPv4-only Docker hosts.
+  - job_name: blackbox_icmp_ipv6
+    metrics_path: /probe
+    params:
+      module:
+        - icmp_ipv6
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/icmp_ipv6_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_dns_udp_aaaa
+    metrics_path: /probe
+    params:
+      module:
+        - dns_udp_aaaa
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/dns_aaaa_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_https_cert_ipv6
+    metrics_path: /probe
+    params:
+      module:
+        - https_cert_ipv6
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/https_ipv6_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_http_get_body_ipv6
+    metrics_path: /probe
+    params:
+      module:
+        - http_get_body_ipv6
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/http_body_ipv6_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_tcp_tls_ipv6
+    metrics_path: /probe
+    params:
+      module:
+        - tcp_tls_ipv6
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/tcp_tls_ipv6_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_http_head_200_ipv6
+    metrics_path: /probe
+    params:
+      module:
+        - http_head_200_ipv6
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/http_ipv6_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: blackbox_tcp_connect_ipv6
+    metrics_path: /probe
+    params:
+      module:
+        - tcp_connect_ipv6
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/tcp_ipv6_targets.yml
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

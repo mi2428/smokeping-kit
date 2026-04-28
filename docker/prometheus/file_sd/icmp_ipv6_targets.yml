@@ -1,0 +1,12 @@
+# Edit this file to add or remove IPv6 ICMP targets. Prometheus refreshes
+# file-SD files every 30 seconds, so target edits do not require a restart.
+# Keep this empty unless Docker and the target network both support IPv6.
+#
+# Example:
+#
+# - targets:
+#     - 2001:db8::10
+#   labels:
+#     group: edge-v6
+#     probe: icmp_ipv6
+[]

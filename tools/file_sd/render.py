@@ -44,39 +44,68 @@ class Probe(StrEnum):
     """Supported probe groups mapped to Prometheus file-SD target files."""
 
     ICMP = "icmp"
+    ICMP_IPV6 = "icmp_ipv6"
     HTTP_HEAD_200 = "http_head_200"
+    HTTP_HEAD_200_IPV6 = "http_head_200_ipv6"
     HTTP_GET_BODY = "http_get_body"
+    HTTP_GET_BODY_IPV6 = "http_get_body_ipv6"
     HTTPS_CERT = "https_cert"
+    HTTPS_CERT_IPV6 = "https_cert_ipv6"
     TCP_CONNECT = "tcp_connect"
+    TCP_CONNECT_IPV6 = "tcp_connect_ipv6"
     TCP_TLS = "tcp_tls"
+    TCP_TLS_IPV6 = "tcp_tls_ipv6"
     DNS_UDP_A = "dns_udp_a"
+    DNS_UDP_AAAA = "dns_udp_aaaa"
 
 
 PROBE_FILES: Mapping[Probe, str] = {
     Probe.ICMP: "icmp_targets.yml",
+    Probe.ICMP_IPV6: "icmp_ipv6_targets.yml",
     Probe.HTTP_HEAD_200: "http_targets.yml",
+    Probe.HTTP_HEAD_200_IPV6: "http_ipv6_targets.yml",
     Probe.HTTP_GET_BODY: "http_body_targets.yml",
+    Probe.HTTP_GET_BODY_IPV6: "http_body_ipv6_targets.yml",
     Probe.HTTPS_CERT: "https_targets.yml",
+    Probe.HTTPS_CERT_IPV6: "https_ipv6_targets.yml",
     Probe.TCP_CONNECT: "tcp_targets.yml",
+    Probe.TCP_CONNECT_IPV6: "tcp_ipv6_targets.yml",
     Probe.TCP_TLS: "tcp_tls_targets.yml",
+    Probe.TCP_TLS_IPV6: "tcp_tls_ipv6_targets.yml",
     Probe.DNS_UDP_A: "dns_targets.yml",
+    Probe.DNS_UDP_AAAA: "dns_aaaa_targets.yml",
 }
 
 PROBE_ALIASES: Mapping[str, Probe] = {
     "dns": Probe.DNS_UDP_A,
+    "dns6": Probe.DNS_UDP_AAAA,
     "dns_udp_a": Probe.DNS_UDP_A,
+    "dns_udp_aaaa": Probe.DNS_UDP_AAAA,
     "http": Probe.HTTP_HEAD_200,
+    "http6": Probe.HTTP_HEAD_200_IPV6,
     "http_head_200": Probe.HTTP_HEAD_200,
+    "http_head_200_ipv6": Probe.HTTP_HEAD_200_IPV6,
     "httping": Probe.HTTP_HEAD_200,
+    "httping6": Probe.HTTP_HEAD_200_IPV6,
     "http_get_body": Probe.HTTP_GET_BODY,
+    "http_get_body_ipv6": Probe.HTTP_GET_BODY_IPV6,
     "https": Probe.HTTPS_CERT,
+    "https6": Probe.HTTPS_CERT_IPV6,
     "https_cert": Probe.HTTPS_CERT,
+    "https_cert_ipv6": Probe.HTTPS_CERT_IPV6,
     "icmp": Probe.ICMP,
+    "icmp6": Probe.ICMP_IPV6,
+    "icmp_ipv6": Probe.ICMP_IPV6,
     "ping": Probe.ICMP,
+    "ping6": Probe.ICMP_IPV6,
     "tcp": Probe.TCP_CONNECT,
+    "tcp6": Probe.TCP_CONNECT_IPV6,
     "tcp_connect": Probe.TCP_CONNECT,
+    "tcp_connect_ipv6": Probe.TCP_CONNECT_IPV6,
     "tcp_tls": Probe.TCP_TLS,
+    "tcp_tls_ipv6": Probe.TCP_TLS_IPV6,
     "tcping": Probe.TCP_CONNECT,
+    "tcping6": Probe.TCP_CONNECT_IPV6,
 }
 
 
@@ -209,6 +238,22 @@ def normalize_path(record: HostsRecord) -> str:
     return path if path.startswith("/") else f"/{path}"
 
 
+def format_host_port(host: str, port: str) -> str:
+    """Return a host:port target, bracketing IPv6 literals when needed."""
+
+    if ":" in host and not host.startswith("["):
+        return f"[{host}]:{port}"
+    return f"{host}:{port}"
+
+
+def format_url_host(host: str) -> str:
+    """Return a URL host, bracketing IPv6 literals when needed."""
+
+    if ":" in host and not host.startswith("["):
+        return f"[{host}]"
+    return host
+
+
 def target_for_probe(record: HostsRecord, probe: Probe) -> str:
     """Build the Blackbox target for a hosts record and probe type."""
 
@@ -216,16 +261,30 @@ def target_for_probe(record: HostsRecord, probe: Probe) -> str:
         return target
 
     match probe:
-        case Probe.ICMP:
+        case Probe.ICMP | Probe.ICMP_IPV6:
             return record.address
-        case Probe.HTTP_HEAD_200 | Probe.HTTP_GET_BODY | Probe.HTTPS_CERT:
+        case (
+            Probe.HTTP_HEAD_200
+            | Probe.HTTP_HEAD_200_IPV6
+            | Probe.HTTP_GET_BODY
+            | Probe.HTTP_GET_BODY_IPV6
+            | Probe.HTTPS_CERT
+            | Probe.HTTPS_CERT_IPV6
+        ):
             scheme = record.attrs.get("scheme", "https")
             path = normalize_path(record)
-            return f"{scheme}://{record.canonical_name}{path}"
-        case Probe.TCP_CONNECT | Probe.TCP_TLS:
-            return f"{record.canonical_name}:{parse_port(record, '443')}"
+            return f"{scheme}://{format_url_host(record.canonical_name)}{path}"
+        case (
+            Probe.TCP_CONNECT
+            | Probe.TCP_CONNECT_IPV6
+            | Probe.TCP_TLS
+            | Probe.TCP_TLS_IPV6
+        ):
+            return format_host_port(record.canonical_name, parse_port(record, "443"))
         case Probe.DNS_UDP_A:
-            return f"{record.address}:{parse_port(record, '53')}"
+            return format_host_port(record.address, parse_port(record, "53"))
+        case Probe.DNS_UDP_AAAA:
+            return format_host_port(record.address, parse_port(record, "53"))
 
 
 def labels_for_record(record: HostsRecord, probe: Probe) -> dict[str, str]:
@@ -239,7 +298,7 @@ def labels_for_record(record: HostsRecord, probe: Probe) -> dict[str, str]:
     }
     if aliases := record.names[1:]:
         labels["aliases"] = ",".join(aliases)
-    if probe is Probe.DNS_UDP_A:
+    if probe in {Probe.DNS_UDP_A, Probe.DNS_UDP_AAAA}:
         labels["dns_query"] = record.attrs.get("dns_query", record.canonical_name)
 
     for key, value in record.attrs.items():

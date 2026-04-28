@@ -1,0 +1,11 @@
+# Edit this file to add or remove TCP connect targets that must be reached over
+# IPv6. Prometheus refreshes file-SD files every 30 seconds.
+#
+# Example:
+#
+# - targets:
+#     - example.com:443
+#   labels:
+#     group: services-v6
+#     probe: tcp_connect_ipv6
+[]

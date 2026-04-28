@@ -1,0 +1,14 @@
+# Edit this file to add or remove IPv6-capable DNS resolver targets. The
+# dns_udp_aaaa module queries example.com AAAA records by default.
+#
+# Target format for IPv6 resolver literals is bracketed host:port.
+#
+# Example:
+#
+# - targets:
+#     - "[2606:4700:4700::1111]:53"
+#   labels:
+#     group: dns-v6
+#     probe: dns_udp_aaaa
+#     dns_query: example.com
+[]

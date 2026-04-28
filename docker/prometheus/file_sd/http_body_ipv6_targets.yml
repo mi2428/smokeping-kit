@@ -1,0 +1,12 @@
+# Edit this file to add or remove HTTP GET body-regexp targets that must be
+# reached over IPv6. Prometheus refreshes file-SD files every 30 seconds.
+#
+# Example:
+#
+# - targets:
+#     - https://example.com
+#   labels:
+#     group: websites-v6
+#     probe: http_get_body_ipv6
+#     body_regexp: Example Domain
+[]
