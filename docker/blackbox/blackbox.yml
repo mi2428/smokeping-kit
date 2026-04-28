@@ -4,7 +4,7 @@ modules:
   # host.docker.internal but block external ICMP replies from containers.
   icmp_ipv4:
     prober: icmp
-    timeout: 5s
+    timeout: 1s
     icmp:
       preferred_ip_protocol: ip4
 
@@ -13,7 +13,7 @@ modules:
   # host does not create noisy default alerts.
   icmp_ipv6:
     prober: icmp
-    timeout: 5s
+    timeout: 1s
     icmp:
       preferred_ip_protocol: ip6
 

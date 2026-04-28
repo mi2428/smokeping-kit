@@ -27,7 +27,7 @@ from string import Template
 GENERATED_BY = "tools/file_sd/render.py"
 DEFAULT_HOSTS = Path("tools/file_sd/hosts")
 DEFAULT_TEMPLATE_DIR = Path("tools/file_sd/templates")
-DEFAULT_OUT_DIR = Path("build/file_sd")
+DEFAULT_OUT_DIR = Path("docker/prometheus/file_sd")
 DEFAULT_TEMPLATE = "file_sd.yml.tmpl"
 
 LABEL_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")

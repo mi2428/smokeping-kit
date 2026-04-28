@@ -74,7 +74,7 @@ Variables:
   HADOLINT                   Dockerfile linter, defaults to hadolint
   FILE_SD_HOSTS              File-SD hosts input, defaults to tools/file_sd/hosts
   FILE_SD_TEMPLATE_DIR       File-SD template directory, defaults to tools/file_sd/templates
-  FILE_SD_OUT                File-SD renderer output, defaults to build/file_sd
+  FILE_SD_OUT                File-SD renderer output, defaults to docker/prometheus/file_sd
   CADDY_HTTP_PORT            Caddy entry port, defaults to 9000
   GRAFANA_PORT               Direct Grafana port, defaults to 3000
   PROMETHEUS_PORT            Direct Prometheus port, defaults to 9090
@@ -90,7 +90,7 @@ Examples:
   make up                    # start the normal Caddy stack
   make up DIRECT=1           # start without Caddy and expose direct ports
   make validate              # validate all generated config files
-  make render                # render FILE_SD_HOSTS into build/file_sd
+  make render                # render FILE_SD_HOSTS into Prometheus file-SD
   make reload                # reload Prometheus
   make logs                  # follow logs for the default stack
 ```

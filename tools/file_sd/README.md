@@ -4,8 +4,7 @@ This optional helper generates Prometheus file service discovery YAML from an `/
 
 ```console
 $ cp tools/file_sd/hosts.example tools/file_sd/hosts
-$ make render  # Write generated files to build/file_sd
-$ make render FILE_SD_HOSTS=tools/file_sd/hosts FILE_SD_OUT=docker/prometheus/file_sd
+$ make render  # Write generated files to docker/prometheus/file_sd
 $ make reload
 ```
 

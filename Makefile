@@ -27,7 +27,7 @@ COMPOSE_DIRECT ?= $(COMPOSE) -f docker-compose.yml -f docker-compose.no-caddy.ym
 COMPOSE_FILES := -f docker-compose.yml
 FILE_SD_HOSTS ?= tools/file_sd/hosts
 FILE_SD_TEMPLATE_DIR ?= tools/file_sd/templates
-FILE_SD_OUT ?= build/file_sd
+FILE_SD_OUT ?= docker/prometheus/file_sd
 HELP_LABEL_WIDTH := 26
 
 ifeq ($(DIRECT),1)
@@ -200,6 +200,6 @@ help: ## Show this help message
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # start the normal Caddy stack\n" "make up"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # start without Caddy and expose direct ports\n" "make up DIRECT=1"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # validate all generated config files\n" "make validate"
-	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # render FILE_SD_HOSTS into build/file_sd\n" "make render"
+	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # render FILE_SD_HOSTS into Prometheus file-SD\n" "make render"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # reload Prometheus\n" "make reload"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m # follow logs for the default stack\n" "make logs"

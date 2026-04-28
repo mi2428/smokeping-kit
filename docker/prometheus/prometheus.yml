@@ -50,7 +50,12 @@ scrape_configs:
   # 1. Add a module to docker/blackbox/blackbox.yml.
   # 2. Add a file_sd target file under docker/prometheus/file_sd/.
   # 3. Copy one of these scrape jobs and change job_name/module/file.
+  #
+  # ICMP jobs are scraped every second to provide smokeping-style loss and RTT
+  # samples. Other probe types use the global 15s scrape interval.
   - job_name: blackbox_icmp
+    scrape_interval: 1s
+    scrape_timeout: 1s
     metrics_path: /probe
     params:
       module:
@@ -186,6 +191,8 @@ scrape_configs:
   # IPv6 probe jobs mirror the default IPv4 jobs. Their file-SD files are empty
   # by default so the stack remains quiet on IPv4-only Docker hosts.
   - job_name: blackbox_icmp_ipv6
+    scrape_interval: 1s
+    scrape_timeout: 1s
     metrics_path: /probe
     params:
       module:
