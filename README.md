@@ -88,7 +88,7 @@ Examples:
   make up                    # start the normal Caddy stack
   make up DIRECT=1           # start without Caddy and expose direct ports
   make validate              # validate all generated config files
-  make render                # render sample file-SD YAML into build/file_sd
+  make render                # render FILE_SD_HOSTS into build/file_sd
   make reload                # reload Prometheus
   make logs                  # follow logs for the default stack
 ```

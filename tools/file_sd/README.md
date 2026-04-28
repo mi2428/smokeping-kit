@@ -3,7 +3,7 @@
 This optional helper generates Prometheus file service discovery YAML from an `/etc/hosts`-style file.
 
 ```console
-$ make render  # Preview generated files
+$ make render  # Write generated files to build/file_sd
 $ make render FILE_SD_HOSTS=targets.hosts FILE_SD_OUT=docker/prometheus/file_sd
 $ make reload
 ```
