@@ -107,8 +107,11 @@ services:
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_PLUGINS_PLUGIN_ADMIN_ENABLED: "false"
+      # Polystat is the only default add-on. It is useful for compact target
+      # status matrices. Set GRAFANA_PLUGINS= in .env to skip plugin installs.
+      GF_PLUGINS_PREINSTALL: "${GRAFANA_PLUGINS-grafana-polystat-panel}"
       GF_PLUGINS_PREINSTALL_AUTO_UPDATE: "false"
-      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_PLUGINS_PREINSTALL_DISABLED: "${GRAFANA_PLUGINS_PREINSTALL_DISABLED:-false}"
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_USERS_DEFAULT_THEME: "${GRAFANA_DEFAULT_THEME:-system}"
     volumes:

@@ -136,6 +136,7 @@ help: ## Show this help message
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Image pull policy, defaults to \033[36malways\033[0m in .env.example\n" "SMOKEPING_KIT_PULL_POLICY"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Grafana admin user, defaults to \033[36madmin\033[0m in .env.example\n" "GRAFANA_ADMIN_USER"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Grafana admin password, defaults to \033[36mchangeme\033[0m in .env.example\n" "GRAFANA_ADMIN_PASSWORD"
+	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Grafana plugins, defaults to \033[36mgrafana-polystat-panel\033[0m in .env.example\n" "GRAFANA_PLUGINS"
 	@printf "\n\033[1mExamples:\033[0m\n"
 	@printf "  \033[36m%-$(HELP_EXAMPLE_WIDTH)s\033[0m # start the normal Caddy stack\n" "make up"
 	@printf "  \033[36m%-$(HELP_EXAMPLE_WIDTH)s\033[0m # start without Caddy and expose direct ports\n" "make up DIRECT=1"
