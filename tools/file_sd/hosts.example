@@ -22,14 +22,26 @@
 210.155.141.200       kame-project         # probe=icmp           group=internet-jp     provider=kame        service=project_web
 203.178.139.57        wide-ad-jp           # probe=icmp           group=internet-jp     provider=wide        service=project_web
 202.12.27.33          m-root               # probe=icmp           group=internet-jp     provider=wide        service=root_dns
+
+dns.google            dns.google           # probe=httping        group=http            provider=google      service=public_dns_http
+one.one.one.one       one.one.one.one      # probe=httping        group=http            provider=cloudflare  service=public_dns_http
+quad9.net             quad9.net            # probe=httping        group=http            provider=quad9       service=public_dns_http
+
+8.8.8.8               google-dns-a         # probe=tcping         group=tcp-dns         provider=google      service=public_dns       port=53  target=8.8.8.8:53
+1.1.1.1               cloudflare-dns-a     # probe=tcping         group=tcp-dns         provider=cloudflare  service=public_dns       port=53  target=1.1.1.1:53
+9.9.9.9               quad9-dns-a          # probe=tcping         group=tcp-dns         provider=quad9       service=public_dns       port=53  target=9.9.9.9:53
+
+8.8.8.8               google-dns-a         # probe=dns            group=dns             provider=google      service=public_dns       dns_query=example.com
+1.1.1.1               cloudflare-dns-a     # probe=dns            group=dns             provider=cloudflare  service=public_dns       dns_query=example.com
+9.9.9.9               quad9-dns-a          # probe=dns            group=dns             provider=quad9       service=public_dns       dns_query=example.com
+
 93.184.216.34         example.com          # probe=httping        group=examples
 93.184.216.34         example.com          # probe=http_get_body  group=examples        body_regexp="Example Domain"
 93.184.216.34         example.com          # probe=https_cert     group=examples
 93.184.216.34         example.com          # probe=tcping         group=examples        port=443
 93.184.216.34         example.com          # probe=tcp_tls        group=examples        port=443
 
-# Example.com IPv6 probes stay commented out because IPv4-only Docker hosts are common.
-# The public ICMPv6 targets below are useful when you intentionally render this file into an IPv6-capable environment.
+# IPv6 targets require an IPv6-capable Docker network and upstream path.
 
 2001:4860:4860::8888  google-dns-v6-a      # probe=icmp6          group=internet-v6     provider=google      service=public_dns
 2001:4860:4860::8844  google-dns-v6-b      # probe=icmp6          group=internet-v6     provider=google      service=public_dns
@@ -41,4 +53,15 @@
 2620:119:53::53       opendns-v6-b         # probe=icmp6          group=internet-v6     provider=opendns     service=public_dns
 2001:2f0:0:8800::1:1  kame-project-v6-a    # probe=icmp6          group=internet-jp-v6  provider=kame        service=project_web
 2001:dc3::35          m-root-v6            # probe=icmp6          group=internet-jp-v6  provider=wide        service=root_dns
+
+dns.google            dns.google           # probe=httping6       group=http-v6         provider=google      service=public_dns_http
+one.one.one.one       one.one.one.one      # probe=httping6       group=http-v6         provider=cloudflare  service=public_dns_http
+quad9.net             quad9.net            # probe=httping6       group=http-v6         provider=quad9       service=public_dns_http
+
+2001:4860:4860::8888  google-dns-v6-a      # probe=tcping6        group=tcp-dns-v6      provider=google      service=public_dns       port=53  target=[2001:4860:4860::8888]:53
+2606:4700:4700::1111  cloudflare-dns-v6-a  # probe=tcping6        group=tcp-dns-v6      provider=cloudflare  service=public_dns       port=53  target=[2606:4700:4700::1111]:53
+2620:fe::fe           quad9-dns-v6-a       # probe=tcping6        group=tcp-dns-v6      provider=quad9       service=public_dns       port=53  target=[2620:fe::fe]:53
+
+2001:4860:4860::8888  google-dns-v6-a      # probe=dns6           group=dns-v6          provider=google      service=public_dns       dns_query=example.com
 2606:4700:4700::1111  cloudflare-dns       # probe=dns6           group=dns-v6          dns_query=example.com
+2620:fe::fe           quad9-dns-v6-a       # probe=dns6           group=dns-v6          provider=quad9       service=public_dns       dns_query=example.com
