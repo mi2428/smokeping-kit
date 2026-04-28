@@ -1,0 +1,10 @@
+[project]
+name = "smokeping-kit-tools"
+version = "0.1.0"
+description = "Helper tools for smokeping-kit"
+readme = "tools/file_sd/README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false

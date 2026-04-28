@@ -1,0 +1,18 @@
+# /etc/hosts-style input for file-SD rendering.
+#
+# Format:
+#   ADDRESS CANONICAL_NAME [ALIASES...] # probe=<probe> group=<group> key=value
+#
+# Plain comments are ignored. key=value pairs in comments become Prometheus
+# labels unless they are renderer controls: probe, target, scheme, path, port.
+
+127.0.0.1 host.docker.internal # probe=icmp group=local target=host.docker.internal
+
+93.184.216.34 example.com # probe=httping group=examples
+93.184.216.34 example.com # probe=http_get_body group=examples body_regexp="Example Domain"
+93.184.216.34 example.com # probe=https_cert group=examples
+
+93.184.216.34 example.com # probe=tcping group=examples port=443
+93.184.216.34 example.com # probe=tcp_tls group=examples port=443
+
+127.0.0.11 docker-dns # probe=dns group=docker dns_query=example.com

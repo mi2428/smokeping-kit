@@ -35,6 +35,10 @@ tramp
 # cask packages
 .cask/
 dist/
+/build/
+.venv/
+__pycache__/
+*.py[cod]
 
 # Flycheck
 flycheck_*.el
