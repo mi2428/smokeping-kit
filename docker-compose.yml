@@ -9,6 +9,7 @@ services:
     #   /alertmanager -> alertmanager
     #   /blackbox     -> blackbox-exporter
     #   /pushgateway  -> pushgateway
+    #   /http-sd      -> http-sd
     image: caddy:latest
     pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
     environment:
@@ -23,6 +24,7 @@ services:
       - alertmanager
       - blackbox-exporter
       - grafana
+      - http-sd
       - prometheus
       - pushgateway
     restart: unless-stopped
@@ -46,10 +48,14 @@ services:
       - ./docker/prometheus/file_sd:/etc/prometheus/file_sd:ro
       # Recording and alerting rules. Run `make validate` after edits.
       - ./docker/prometheus/rules:/etc/prometheus/rules:ro
+      # Additional scrape jobs. http_sd.yml is active by default but returns no
+      # targets until tools/http_sd/server.py is customized.
+      - ./docker/prometheus/scrape_configs:/etc/prometheus/scrape_configs:ro
       - prometheus-data:/prometheus
     depends_on:
       - alertmanager
       - blackbox-exporter
+      - http-sd
       - pushgateway
     restart: unless-stopped
 
@@ -89,6 +95,22 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro
+    restart: unless-stopped
+
+  http-sd:
+    # Lightweight HTTP service discovery app for generated Blackbox targets.
+    # It returns no targets until tools/http_sd/server.py is customized.
+    build:
+      context: .
+      dockerfile: tools/http_sd/Dockerfile
+    environment:
+      HTTP_SD_HOST: 0.0.0.0
+      HTTP_SD_PORT: 8080
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      # Mount app source so discovery logic edits do not require an image
+      # rebuild. Restart this service after changing Python code.
+      - ./tools/http_sd:/app:ro
     restart: unless-stopped
 
   grafana:

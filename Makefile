@@ -8,6 +8,7 @@ COMPOSE ?= $(shell if $(DOCKER) compose version >/dev/null 2>&1; then printf '%s
 CURL   ?= curl
 UV     ?= uv
 PYTHON ?= $(UV) run python
+HADOLINT ?= $(shell if command -v hadolint >/dev/null 2>&1; then printf 'hadolint'; else printf '%s run --rm -i hadolint/hadolint:latest hadolint' '$(DOCKER)'; fi)
 
 DIRECT ?= 0
 CADDY_HTTP_PORT        ?= 9000
@@ -23,6 +24,7 @@ export
 endif
 
 COMPOSE_DIRECT ?= $(COMPOSE) -f docker-compose.yml -f docker-compose.no-caddy.yml
+COMPOSE_FILES := -f docker-compose.yml
 FILE_SD_HOSTS ?= tools/file_sd/targets.example.hosts
 FILE_SD_TEMPLATE_DIR ?= tools/file_sd/templates
 FILE_SD_OUT ?= build/file_sd
@@ -30,12 +32,13 @@ HELP_VARIABLE_WIDTH := 26
 HELP_EXAMPLE_WIDTH  := 24
 
 ifeq ($(DIRECT),1)
-STACK_COMPOSE := $(COMPOSE_DIRECT)
+COMPOSE_FILES += -f docker-compose.no-caddy.yml
 PROMETHEUS_RELOAD_URL := http://localhost:$(PROMETHEUS_PORT)/-/reload
 else
-STACK_COMPOSE := $(COMPOSE)
 PROMETHEUS_RELOAD_URL := http://localhost:$(CADDY_HTTP_PORT)/prometheus/-/reload
 endif
+
+STACK_COMPOSE := $(COMPOSE) $(COMPOSE_FILES)
 
 ##@ Stack
 
@@ -75,6 +78,10 @@ validate: ## Validate Compose, Caddy, Blackbox, Prometheus, and Alertmanager con
 	@$(COMPOSE) config >/dev/null
 	@$(COMPOSE_DIRECT) config >/dev/null
 	@$(PYTHON) tools/file_sd/render.py --hosts "$(FILE_SD_HOSTS)" --template-dir "$(FILE_SD_TEMPLATE_DIR)" --out-dir "$(FILE_SD_OUT)" --check
+	@$(PYTHON) -m unittest tools/file_sd/render_test.py
+	@$(PYTHON) tools/http_sd/server.py --check
+	@$(PYTHON) -m unittest tools/http_sd/server_test.py
+	@$(HADOLINT) - < tools/http_sd/Dockerfile
 	@awk 'BEGIN { bad = 0 } /^receivers:/ { in_receivers = 1 } in_receivers && /^#/ { printf "bad receiver comment indent: %s:%d:%s\n", FILENAME, FNR, $$0; bad = 1 } END { exit bad }' docker/alertmanager/alertmanager.yml
 	@$(DOCKER) run --rm -v "$$(pwd)/docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:latest caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 	@$(DOCKER) run --rm -v "$$(pwd)/docker/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro" prom/blackbox-exporter:latest --config.file=/etc/blackbox_exporter/blackbox.yml --config.check
@@ -124,6 +131,7 @@ help: ## Show this help message
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Compose command for DIRECT=1, defaults to \033[36m%s\033[0m\n" "COMPOSE_DIRECT" "$(COMPOSE_DIRECT)"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Python project manager, defaults to \033[36m%s\033[0m\n" "UV" "$(UV)"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Python command for helper scripts, defaults to \033[36m%s\033[0m\n" "PYTHON" "$(PYTHON)"
+	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m Dockerfile linter, defaults to \033[36m%s\033[0m\n" "HADOLINT" "$(HADOLINT)"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m File-SD hosts input, defaults to \033[36m%s\033[0m\n" "FILE_SD_HOSTS" "$(FILE_SD_HOSTS)"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m File-SD template directory, defaults to \033[36m%s\033[0m\n" "FILE_SD_TEMPLATE_DIR" "$(FILE_SD_TEMPLATE_DIR)"
 	@printf "  \033[36m%-$(HELP_VARIABLE_WIDTH)s\033[0m File-SD renderer output, defaults to \033[36m%s\033[0m\n" "FILE_SD_OUT" "$(FILE_SD_OUT)"

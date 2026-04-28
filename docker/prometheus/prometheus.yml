@@ -8,6 +8,11 @@ rule_files:
   # Recording and alerting rules are split for readability.
   - /etc/prometheus/rules/*.yml
 
+scrape_config_files:
+  # Extra scrape jobs live here. http_sd.yml is active by default and stays
+  # quiet until tools/http_sd/server.py returns targets.
+  - /etc/prometheus/scrape_configs/*.yml
+
 alerting:
   alertmanagers:
     - static_configs:

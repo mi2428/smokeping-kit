@@ -44,4 +44,10 @@
 	handle_path /pushgateway/* {
 		reverse_proxy pushgateway:9091
 	}
+
+	# HTTP service discovery app for dynamic Blackbox target generation.
+	redir /http-sd /http-sd/ 302
+	handle_path /http-sd/* {
+		reverse_proxy http-sd:8080
+	}
 }

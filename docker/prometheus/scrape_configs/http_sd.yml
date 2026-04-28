@@ -1,0 +1,25 @@
+scrape_configs:
+  # HTTP service discovery for Blackbox Exporter.
+  #
+  # The HTTP SD app returns Prometheus target groups containing a "module" label.
+  # This job copies that label into __param_module, so one scrape job can drive
+  # ICMP, HTTP, TCP, TLS, DNS, IPv4, and IPv6 blackbox modules.
+  #
+  # The app returns no targets until tools/http_sd/server.py is customized.
+  - job_name: blackbox_http_sd
+    metrics_path: /probe
+    http_sd_configs:
+      - url: http://http-sd:8080/sd
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - module
+        target_label: __param_module
+      - source_labels:
+          - __address__
+        target_label: __param_target
+      - source_labels:
+          - __param_target
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
