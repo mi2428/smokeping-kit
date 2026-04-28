@@ -120,6 +120,7 @@
         }
       ],
       "title": "ICMP Status History",
+      "transparent": true,
       "type": "status-history"
     },
     {
@@ -221,6 +222,7 @@
         }
       ],
       "title": "HTTP Status History",
+      "transparent": true,
       "type": "status-history"
     },
     {
@@ -322,6 +324,7 @@
         }
       ],
       "title": "TCP Status History",
+      "transparent": true,
       "type": "status-history"
     },
     {
@@ -423,6 +426,7 @@
         }
       ],
       "title": "DNS Status History",
+      "transparent": true,
       "type": "status-history"
     }
   ],
