@@ -1,0 +1,54 @@
+# /etc/hosts-style input for file-SD rendering.
+#
+# Format:
+#   ADDRESS CANONICAL_NAME [ALIASES...] # probe=<probe> group=<group> key=value
+#
+# Plain comments are ignored.
+# key=value pairs in comments become Prometheus labels unless they are renderer controls: probe, target, scheme, path, port.
+
+127.0.0.1  host.docker.internal  # probe=icmp  group=local  target=host.docker.internal
+
+# Public anycast DNS resolvers are useful low-volume ICMP smoke targets.
+# Keep scrape intervals modest; these are shared public services.
+
+8.8.8.8          google-dns-a      # probe=icmp           group=internet     provider=google      service=public_dns
+8.8.4.4          google-dns-b      # probe=icmp           group=internet     provider=google      service=public_dns
+1.1.1.1          cloudflare-dns-a  # probe=icmp           group=internet     provider=cloudflare  service=public_dns
+1.0.0.1          cloudflare-dns-b  # probe=icmp           group=internet     provider=cloudflare  service=public_dns
+9.9.9.9          quad9-dns-a       # probe=icmp           group=internet     provider=quad9       service=public_dns
+149.112.112.112  quad9-dns-b       # probe=icmp           group=internet     provider=quad9       service=public_dns
+208.67.222.222   opendns-a         # probe=icmp           group=internet     provider=opendns     service=public_dns
+208.67.220.220   opendns-b         # probe=icmp           group=internet     provider=opendns     service=public_dns
+210.155.141.200  kame-project      # probe=icmp           group=internet-jp  provider=kame        service=project_web
+203.178.139.57   wide-ad-jp        # probe=icmp           group=internet-jp  provider=wide        service=project_web
+202.12.27.33     m-root            # probe=icmp           group=internet-jp  provider=wide        service=root_dns
+
+93.184.216.34    example.com       # probe=httping        group=examples
+93.184.216.34    example.com       # probe=http_get_body  group=examples     body_regexp="Example Domain"
+93.184.216.34    example.com       # probe=https_cert     group=examples
+
+93.184.216.34    example.com       # probe=tcping         group=examples     port=443
+93.184.216.34    example.com       # probe=tcp_tls        group=examples     port=443
+
+127.0.0.11       docker-dns        # probe=dns            group=docker       dns_query=example.com
+
+# Example.com IPv6 probes stay commented out because IPv4-only Docker hosts are common.
+# The public ICMPv6 targets below are useful when you intentionally render this file into an IPv6-capable environment.
+
+2001:4860:4860::8888                google-dns-v6-a      # probe=icmp6     group=internet-v6     provider=google      service=public_dns
+2001:4860:4860::8844                google-dns-v6-b      # probe=icmp6     group=internet-v6     provider=google      service=public_dns
+2606:4700:4700::1111                cloudflare-dns-v6-a  # probe=icmp6     group=internet-v6     provider=cloudflare  service=public_dns
+2606:4700:4700::1001                cloudflare-dns-v6-b  # probe=icmp6     group=internet-v6     provider=cloudflare  service=public_dns
+2620:fe::fe                         quad9-dns-v6-a       # probe=icmp6     group=internet-v6     provider=quad9       service=public_dns
+2620:fe::9                          quad9-dns-v6-b       # probe=icmp6     group=internet-v6     provider=quad9       service=public_dns
+2620:119:35::35                     opendns-v6-a         # probe=icmp6     group=internet-v6     provider=opendns     service=public_dns
+2620:119:53::53                     opendns-v6-b         # probe=icmp6     group=internet-v6     provider=opendns     service=public_dns
+2001:2f0:0:8800::1:1                kame-project-v6-a    # probe=icmp6     group=internet-jp-v6  provider=kame        service=project_web
+2001:2f0:0:8800:226:2dff:fe0b:4311  kame-project-v6-b    # probe=icmp6     group=internet-jp-v6  provider=kame        service=project_web
+2001:200:0:180c:20c:29ff:fec9:9d61  wide-ad-jp-v6        # probe=icmp6     group=internet-jp-v6  provider=wide        service=project_web
+2001:dc3::35                        m-root-v6            # probe=icmp6     group=internet-jp-v6  provider=wide        service=root_dns
+
+2606:2800:220:1:248:1893:25c8:1946  example.com          # probe=icmp6     group=examples-v6
+2606:2800:220:1:248:1893:25c8:1946  example.com          # probe=httping6  group=examples-v6
+2606:2800:220:1:248:1893:25c8:1946  example.com          # probe=tcping6   group=examples-v6     port=443
+2606:4700:4700::1111                cloudflare-dns       # probe=dns6      group=dns-v6          dns_query=example.com

@@ -25,7 +25,7 @@ endif
 
 COMPOSE_DIRECT ?= $(COMPOSE) -f docker-compose.yml -f docker-compose.no-caddy.yml
 COMPOSE_FILES := -f docker-compose.yml
-FILE_SD_HOSTS ?= tools/file_sd/targets.example.hosts
+FILE_SD_HOSTS ?= tools/file_sd/hosts
 FILE_SD_TEMPLATE_DIR ?= tools/file_sd/templates
 FILE_SD_OUT ?= build/file_sd
 HELP_LABEL_WIDTH := 26

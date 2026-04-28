@@ -60,7 +60,7 @@ class ParseTest(unittest.TestCase):
 
     def test_parse_hosts_file_rejects_empty_input(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "targets.hosts"
+            path = Path(tmp) / "hosts"
             path.write_text("# only comments\n\n", encoding="utf-8")
 
             with self.assertRaisesRegex(render.ConfigError, "no hosts entries found"):
@@ -242,7 +242,7 @@ class RenderTest(unittest.TestCase):
     def test_render_hosts_outputs_all_known_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            hosts = root / "targets.hosts"
+            hosts = root / "hosts"
             template_dir = root / "templates"
             template_dir.mkdir()
             hosts.write_text(
@@ -290,7 +290,7 @@ class RenderTest(unittest.TestCase):
     def test_main_check_does_not_write_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            hosts = root / "targets.hosts"
+            hosts = root / "hosts"
             template_dir = root / "templates"
             out_dir = root / "out"
             template_dir.mkdir()
@@ -312,21 +312,40 @@ class RenderTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertFalse(out_dir.exists())
 
-    def test_main_returns_one_for_config_error(self) -> None:
-        error_output = io.StringIO()
-        with tempfile.TemporaryDirectory() as tmp, redirect_stderr(error_output):
+    def test_main_returns_zero_for_missing_hosts(self) -> None:
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp, redirect_stdout(output):
             exit_code = render.main(
                 [
                     "--hosts",
-                    str(Path(tmp) / "missing.hosts"),
+                    str(Path(tmp) / "missing"),
                     "--template-dir",
                     tmp,
                     "--check",
                 ]
-            )
+        )
 
-        self.assertEqual(exit_code, 1)
-        self.assertIn("missing.hosts", error_output.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertIn("No hosts file found; nothing to render.", output.getvalue())
+
+    def test_main_returns_zero_for_empty_hosts(self) -> None:
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as tmp, redirect_stdout(output):
+            root = Path(tmp)
+            hosts = root / "hosts"
+            hosts.write_text("# no targets\n", encoding="utf-8")
+            exit_code = render.main(
+                [
+                    "--hosts",
+                    str(hosts),
+                    "--template-dir",
+                    tmp,
+                    "--check",
+                ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("No hosts entries found; nothing to render.", output.getvalue())
 
 
 if __name__ == "__main__":

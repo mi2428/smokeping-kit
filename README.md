@@ -15,19 +15,21 @@ $ gh auth login
 $ gh repo create YOUR_ORG/YOUR_REPO --template mi2428/smokeping-kit --private --clone
 ```
 
-After setting up the repository, edit the files that match what you want to change.
+After setting up the repository, copy the local files and edit what you need.
 
-- Add or remove probe targets: [`docker/prometheus/file_sd/*.yml`](docker/prometheus/file_sd/)
+- Add or remove generated probe targets: `tools/file_sd/hosts`
+- Edit Prometheus file-SD YAML directly: [`docker/prometheus/file_sd/*.yml`](docker/prometheus/file_sd/)
 - Change Prometheus scrape jobs or wire a new Blackbox module: [`docker/prometheus/prometheus.yml`](docker/prometheus/prometheus.yml)
 - Change probe behavior such as ICMP, HTTP, TCP, TLS, or DNS modules: [`docker/blackbox/blackbox.yml`](docker/blackbox/blackbox.yml)
 - Change recording rules used by dashboards and alerts: [`docker/prometheus/rules/recording.yml`](docker/prometheus/rules/recording.yml)
 - Change alert expressions, thresholds, labels, or annotations: [`docker/prometheus/rules/alerts.yml`](docker/prometheus/rules/alerts.yml)
 - Route alerts to Slack, webhook, email, or another receiver: [`docker/alertmanager/alertmanager.yml`](docker/alertmanager/alertmanager.yml)
 
-After editing the files, copy the example environment file and run `make` to see the available commands and URLs.
+Run `make` to see the available commands and URLs.
 
 ```console
 $ cp .env.example .env
+$ cp tools/file_sd/hosts.example tools/file_sd/hosts
 $ make
 
 Stack
@@ -70,7 +72,7 @@ Variables:
   UV                         Python project manager, defaults to uv
   PYTHON                     Python command for helper scripts, defaults to uv run python
   HADOLINT                   Dockerfile linter, defaults to hadolint
-  FILE_SD_HOSTS              File-SD hosts input, defaults to tools/file_sd/targets.example.hosts
+  FILE_SD_HOSTS              File-SD hosts input, defaults to tools/file_sd/hosts
   FILE_SD_TEMPLATE_DIR       File-SD template directory, defaults to tools/file_sd/templates
   FILE_SD_OUT                File-SD renderer output, defaults to build/file_sd
   CADDY_HTTP_PORT            Caddy entry port, defaults to 9000

@@ -3,19 +3,20 @@
 This optional helper generates Prometheus file service discovery YAML from an `/etc/hosts`-style file.
 
 ```console
+$ cp tools/file_sd/hosts.example tools/file_sd/hosts
 $ make render  # Write generated files to build/file_sd
-$ make render FILE_SD_HOSTS=targets.hosts FILE_SD_OUT=docker/prometheus/file_sd
+$ make render FILE_SD_HOSTS=tools/file_sd/hosts FILE_SD_OUT=docker/prometheus/file_sd
 $ make reload
 ```
 
 Input shape:
 
 ```text
-93.184.216.34 example.com # probe=httping group=examples
-93.184.216.34 example.com # probe=tcping group=examples port=443
-127.0.0.11 docker-dns # probe=dns group=docker dns_query=example.com
-2606:2800:220:1:248:1893:25c8:1946 example.com # probe=httping6 group=examples-v6
-2606:4700:4700::1111 cloudflare-dns # probe=dns6 group=dns-v6 dns_query=example.com
+93.184.216.34                            example.com     # probe=httping   group=examples
+93.184.216.34                            example.com     # probe=tcping    group=examples     port=443
+127.0.0.11                               docker-dns      # probe=dns       group=docker       dns_query=example.com
+2606:2800:220:1:248:1893:25c8:1946      example.com     # probe=httping6  group=examples-v6
+2606:4700:4700::1111                     cloudflare-dns  # probe=dns6      group=dns-v6       dns_query=example.com
 ```
 
 ## Supported Probes

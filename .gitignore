@@ -1,6 +1,8 @@
 .env
+# Local file-SD renderer inputs.
+tools/file_sd/hosts
 tools/file_sd/*.hosts
-!tools/file_sd/*.example.hosts
+!tools/file_sd/hosts.example
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,vim,emacs,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,vim,emacs,visualstudiocode

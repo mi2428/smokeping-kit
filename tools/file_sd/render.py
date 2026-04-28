@@ -25,7 +25,7 @@ from pathlib import Path
 from string import Template
 
 GENERATED_BY = "tools/file_sd/render.py"
-DEFAULT_HOSTS = Path("tools/file_sd/targets.example.hosts")
+DEFAULT_HOSTS = Path("tools/file_sd/hosts")
 DEFAULT_TEMPLATE_DIR = Path("tools/file_sd/templates")
 DEFAULT_OUT_DIR = Path("build/file_sd")
 DEFAULT_TEMPLATE = "file_sd.yml.tmpl"
@@ -426,11 +426,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line renderer."""
 
     config = parse_args(argv)
+    if not config.hosts.exists():
+        print("No hosts file found; nothing to render.")
+        return 0
+
     try:
         rendered = render_hosts(config)
         if not config.check:
             write_outputs(rendered, config.out_dir)
     except ConfigError as exc:
+        if "no hosts entries found" in str(exc):
+            print("No hosts entries found; nothing to render.")
+            return 0
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
