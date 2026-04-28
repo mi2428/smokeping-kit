@@ -152,3 +152,12 @@ volumes:
   alertmanager-data:
   prometheus-data:
   grafana-data:
+
+networks:
+  default:
+    # IPv6 probes need an IPv6-capable Docker network. Docker will still assign
+    # an IPv4 subnet automatically. Change this prefix in .env if it collides.
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "${SMOKEPING_KIT_IPV6_SUBNET:-fd42:2428:2428::/64}"

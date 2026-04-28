@@ -17,6 +17,7 @@ PUSHGATEWAY_PORT       ?= 9091
 ALERTMANAGER_PORT      ?= 9093
 BLACKBOX_EXPORTER_PORT ?= 9115
 GRAFANA_PORT           ?= 3000
+SMOKEPING_KIT_IPV6_SUBNET ?= fd42:2428:2428::/64
 
 ifneq (,$(wildcard .env))
 include .env
@@ -192,6 +193,7 @@ help: ## Show this help message
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Direct Alertmanager port, defaults to \033[36m%s\033[0m\n" "ALERTMANAGER_PORT" "$(ALERTMANAGER_PORT)"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Direct Blackbox Exporter port, defaults to \033[36m%s\033[0m\n" "BLACKBOX_EXPORTER_PORT" "$(BLACKBOX_EXPORTER_PORT)"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Direct Pushgateway port, defaults to \033[36m%s\033[0m\n" "PUSHGATEWAY_PORT" "$(PUSHGATEWAY_PORT)"
+	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Docker IPv6 subnet, defaults to \033[36m%s\033[0m\n" "SMOKEPING_KIT_IPV6_SUBNET" "$(SMOKEPING_KIT_IPV6_SUBNET)"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Image pull policy, defaults to \033[36malways\033[0m in .env.example\n" "SMOKEPING_KIT_PULL_POLICY"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Grafana admin user, defaults to \033[36madmin\033[0m in .env.example\n" "GRAFANA_ADMIN_USER"
 	@printf "  \033[36m%-$(HELP_LABEL_WIDTH)s\033[0m Grafana admin password, defaults to \033[36mchangeme\033[0m in .env.example\n" "GRAFANA_ADMIN_PASSWORD"

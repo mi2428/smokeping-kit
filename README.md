@@ -81,6 +81,7 @@ Variables:
   ALERTMANAGER_PORT          Direct Alertmanager port, defaults to 9093
   BLACKBOX_EXPORTER_PORT     Direct Blackbox Exporter port, defaults to 9115
   PUSHGATEWAY_PORT           Direct Pushgateway port, defaults to 9091
+  SMOKEPING_KIT_IPV6_SUBNET  Docker IPv6 subnet, defaults to fd42:2428:2428::/64
   SMOKEPING_KIT_PULL_POLICY  Image pull policy, defaults to always in .env.example
   GRAFANA_ADMIN_USER         Grafana admin user, defaults to admin in .env.example
   GRAFANA_ADMIN_PASSWORD     Grafana admin password, defaults to changeme in .env.example
