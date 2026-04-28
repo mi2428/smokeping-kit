@@ -2,27 +2,10 @@
 
 This optional helper generates Prometheus file service discovery YAML from an `/etc/hosts`-style file.
 
-It deliberately uses only Python standard library modules.
-The input is hosts format, the template is `string.Template`, and the output is Prometheus file-SD YAML.
-Python execution is managed by `uv` through the repository `pyproject.toml`.
-
-Preview generated files:
-
 ```console
-$ make render
-```
-
-Write generated files into the active Prometheus file-SD directory:
-
-```console
-$ make render FILE_SD_OUT=docker/prometheus/file_sd
-$ make reload
-```
-
-Use your own hosts file:
-
-```console
+$ make render  # Preview generated files
 $ make render FILE_SD_HOSTS=targets.hosts FILE_SD_OUT=docker/prometheus/file_sd
+$ make reload
 ```
 
 Input shape:
@@ -35,7 +18,10 @@ Input shape:
 2606:4700:4700::1111 cloudflare-dns # probe=dns6 group=dns-v6 dns_query=example.com
 ```
 
-Supported probe values:
+## Supported Probes
+
+Use `target=...` to override the generated target.
+Keep the generated labels aligned with the scrape jobs in `docker/prometheus/prometheus.yml` and the modules in `docker/blackbox/blackbox.yml`.
 
 | Probe | Alias | Output file | What it checks |
 | --- | --- | --- | --- |
@@ -53,6 +39,3 @@ Supported probe values:
 | `tcp_tls_ipv6` | - | `tcp_tls_ipv6_targets.yml` | TCP connect plus TLS handshake over IPv6. |
 | `dns` | `dns_udp_a` | `dns_targets.yml` | DNS UDP A query against the target resolver. |
 | `dns6` | `dns_udp_aaaa` | `dns_aaaa_targets.yml` | DNS UDP AAAA query against the target resolver over IPv6. |
-
-Use `target=...` to override the generated target.
-Keep the generated labels aligned with the scrape jobs in `docker/prometheus/prometheus.yml` and the modules in `docker/blackbox/blackbox.yml`.

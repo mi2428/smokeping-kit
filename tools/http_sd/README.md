@@ -1,16 +1,10 @@
 # HTTP-SD Server
 
 This helper is a small Prometheus HTTP service discovery app for Blackbox Exporter targets.
-It is part of the default Compose stack:
-
-```console
-$ make up
-```
 
 ## Custom Discovery
 
 Implement your own discovery by editing `discover_targets()` in `server.py`.
-Minimal implementation:
 
 ```python
 def discover_targets() -> list[BlackboxTarget]:
@@ -26,11 +20,8 @@ def discover_targets() -> list[BlackboxTarget]:
     ]
 ```
 
-Typical implementations read YAML/JSON, query cloud tags, call a CMDB, inspect service registries, or generate targets from DNS records.
-
 The app validates module names and Prometheus label names before returning data.
 `module`, `probe`, and `source` are reserved labels because the Prometheus scrape job uses `module` to set `__param_module`.
-One HTTP SD job can drive all probe types.
 
 Validate locally:
 
