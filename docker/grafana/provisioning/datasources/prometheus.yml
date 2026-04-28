@@ -17,6 +17,10 @@ datasources:
     # Internal Compose service URL, not localhost. Grafana runs inside Docker.
     url: http://prometheus:9090
     isDefault: true
+    jsonData:
+      # ICMP probes scrape every second. This tells Grafana not to assume the
+      # Prometheus default 15s scrape interval when it calculates query steps.
+      timeInterval: 1s
     # Keep editable for quick experiments. Set false if you want provisioning to
     # be the single source of truth.
     editable: true
