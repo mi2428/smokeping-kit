@@ -27,6 +27,8 @@ services:
       - http-sd
       - prometheus
       - pushgateway
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
   prometheus:
@@ -57,6 +59,8 @@ services:
       - blackbox-exporter
       - http-sd
       - pushgateway
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
   alertmanager:
@@ -72,6 +76,8 @@ services:
       # real Slack/webhook/email/PagerDuty credentials.
       - ./docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
   pushgateway:
@@ -79,6 +85,8 @@ services:
     # You can remove this service if the stack is only for blackbox probing.
     image: prom/pushgateway:latest
     pull_policy: "${SMOKEPING_KIT_PULL_POLICY:-always}"
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
   blackbox-exporter:
@@ -95,6 +103,8 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml:ro
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
   http-sd:
@@ -111,6 +121,8 @@ services:
       # Mount app source so discovery logic edits do not require an image
       # rebuild. Restart this service after changing Python code.
       - ./tools/http_sd:/app:ro
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
   grafana:
@@ -145,6 +157,8 @@ services:
       - grafana-data:/var/lib/grafana
     depends_on:
       - prometheus
+    security_opt:
+      - apparmor=unconfined
     restart: unless-stopped
 
 volumes:
